@@ -14,7 +14,8 @@
 # "by industry" has employment per industry in each of 10 industries per state for the same years.
 #
 # Load and merge the data into a panel dataframe, with the columns: "state", "year", and one for each
-# of the 10 industries.  No more and no less than 12 columns should remain.
+# of the 10 industries.  No more and no less than 12 columns should remain.  Do any necessary cleaning
+# for the data to be easily usable.
 #
 # The values should be given as the share of the total employment in that place and time, e.g. if
 # total employment in a place and time was 100, and the employment in one industry was 10, then the
