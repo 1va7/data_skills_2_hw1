@@ -1,15 +1,15 @@
 # Data Skills 2
-# Autumn 2020
+# Autumn 2021
 #
 # Homework 1
 #
-# Due Tuesday October 13th before midnight on GitHub classroom.  Please read the academic integrity
+# Due Monday October 11th before midnight on GitHub classroom.  Please read the academic integrity
 # section of the syllabus for guidelines on how to collaborate and cite sources, and the grading
-# rubric posted on Canvas (under announcements or files).
+# rubric posted on Canvas (under syllabus).
 #
 # Be sure to clean up your code, removing unnecessary elements like intermediate output that were
 # only used in debugging.  Write this as if it were something you were doing for your work as a
-# research assistant.
+# research assistant.  You will be graded on how well you generalize and organize your code.
 #
 # #################################################
 
