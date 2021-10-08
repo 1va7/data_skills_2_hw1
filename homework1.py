@@ -1,40 +1,76 @@
-# Data Skills 2
-# Autumn 2021
-#
-# Homework 1
-#
-# Due Monday October 11th before midnight on GitHub classroom.  Please read the academic integrity
-# section of the syllabus for guidelines on how to collaborate and cite sources, and the grading
-# rubric posted on Canvas (under syllabus).
-#
-# Be sure to clean up your code, removing unnecessary elements like intermediate output that were
-# only used in debugging.  Write this as if it were something you were doing for your work as a
-# research assistant.  You will be graded on how well you generalize and organize your code.
-#
-# #################################################
-
-# 1. The two datasets included in the assignment repo are downloaded directly from the BEA.  The file
-# labeled "total" has the total employment per state for the years 2000 and 2017.  The file labeled
-# "by industry" has employment per industry in each of 10 industries per state for the same years.
-#
-# Load and merge the data into a panel dataframe, with the columns: "state", "year", and one for each
-# of the 10 industries.  Every state-year combination should uniquely identify a row.  No more and no
-# less than 12 columns should remain.  Do any necessary cleaning for the data to be easily usable.
-#
-# The values should be given as the share of the total employment in that place and time, e.g. if
-# total employment in a place and time was 100, and the employment in one industry was 10, then the
-# value shown for that state-year industry should be 0.1.
-#
-# Output this dataframe to a csv document named "data.csv" and sync it to your homework repo with
-# your code.
+import pandas as pd
+import os
 
 
+def read_bea_csv(fname):
+    df = pd.read_csv(os.path.join(PATH, fname), skiprows=4)
+    return df
 
-# 2. Using the dataset you created, answer the following questions:
-#
-# a. Find the states with the top five share of manufacturing employment in the year 2000, then show
-# how their share of employment in manufacturing changed between 2000 and 2017.  Use a basic plot to
-# display the information.
-#
-# b. Show which five states have the highest concentration of employment in a single industry in each
-# of 2000 and 2017, and what those industries are.
+
+def drop_cols(df, cols_to_keep):
+    cols_to_drop = df.columns[~df.columns.isin(cols_to_keep)]
+    df = df.drop(cols_to_drop, axis=1)
+    return df
+
+
+def clean_str(df, cols_str):
+    for col_str in cols_str:
+        df[col_str] = [c.lstrip() for c in df[col_str].astype(str)]
+    return df
+
+
+def clean_num(df, cols_num):
+    for col_num in cols_num:
+        df[col_num] = pd.to_numeric(df[col_num], errors='coerce')
+    return df
+
+
+def clean(df, cols_to_keep, cols_str=False, cols_num=False):
+    df = df.dropna()
+    df = drop_cols(df, cols_to_keep)
+    if cols_str:
+        df = clean_str(df, cols_str)
+    if cols_num:
+        df = clean_num(df, cols_num)
+    return df
+
+
+def reshape(df, wide_to_long=['Year','Employment'], long_to_wide=['Description']):
+    if wide_to_long:
+        df_reshaped = pd.melt(df, id_vars=df.columns[~df.columns.isin(cols_num)],
+                              value_vars=cols_num,
+                              var_name=wide_to_long[0],
+                              value_name=wide_to_long[1])
+        df = df_reshaped
+    if long_to_wide:
+        cols_index = df.columns[~df.columns.isin([*long_to_wide, wide_to_long[1]])]
+        df_reshaped = df.pivot(index=cols_index, columns=long_to_wide[0], values=wide_to_long[1]).reset_index()
+    return df_reshaped
+
+
+def merge_and_calculate(df_industries,df_total):
+    df = pd.merge(df_industries,df_total,on=df_total.columns[0:2].to_list())
+    df = df.rename(columns={'GeoName':'state','Year':'year'})
+    df[df.columns[2:12]] = df[df.columns[2:12]].div(df[df.columns[12]].values, axis=0)
+    df = df.drop(df.columns[12],axis=1)
+    return df
+
+
+PATH = r'E:\Files\HaHaHariss\21Fall\Data Skills for Public Policy\data_skills_2_hw1'
+
+cols_to_keep = ['GeoName', '2000', '2017', 'Description']
+cols_str = ['Description']
+cols_num = ['2000', '2017']
+
+df_industries = clean(read_bea_csv('SAEMP25N by industry.csv'), cols_to_keep, cols_str, cols_num)
+df_total = clean(read_bea_csv('SAEMP25N total.csv'), cols_to_keep, cols_num=cols_num)
+
+df_industries = reshape(df_industries)
+df_total = reshape(df_total, long_to_wide=False)
+
+df_merged = merge_and_calculate(df_industries, df_total)
+
+df_merged.to_csv('data.csv')
+
+
+
