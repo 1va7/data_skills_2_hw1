@@ -1,5 +1,8 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 import os
+
 
 
 def read_bea_csv(fname):
@@ -56,6 +59,16 @@ def merge_and_calculate(df_industries,df_total):
     return df
 
 
+def top_states(df,industry='Manufacturing',top=5,year=2000):
+    names_top_states = df[df['year'] == year].nlargest(top, industry)['state']
+    print('top',top,'states that had the highest share of',
+          industry,'employment in year',2000,'are:\n',
+          names_top_states.tolist())
+    df_top_states = df[[c in names_top_states.tolist() for c in df['state']]][[*['state','year'], industry]]
+    sns.lineplot(data=df_top_states, x='year', y=industry, hue='state')
+    plt.savefig('top 5 states of manufactoring shares.png')
+
+
 PATH = r'E:\Files\HaHaHariss\21Fall\Data Skills for Public Policy\data_skills_2_hw1'
 
 cols_to_keep = ['GeoName', '2000', '2017', 'Description']
@@ -72,5 +85,7 @@ df_merged = merge_and_calculate(df_industries, df_total)
 
 df_merged.to_csv('data.csv')
 
+df = pd.read_csv('data.csv')
+top_states(df)
 
 
