@@ -1,9 +1,11 @@
+#Author: Huaiqian Ye
+#UCID: 12261853
+
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
-
-
 
 def read_bea_csv(fname):
     df = pd.read_csv(os.path.join(PATH, fname), skiprows=4)
@@ -82,25 +84,28 @@ def find_max(df,year,top=5):
     print(df_max.nlargest(top, 'concentration'),'\n')
 
 
-PATH = r'E:\Files\HaHaHariss\21Fall\Data Skills for Public Policy\data_skills_2_hw1'
+def q_1():
+    df_industries = clean(read_bea_csv('SAEMP25N by industry.csv'), cols_to_keep, cols_str, cols_num)
+    df_total = clean(read_bea_csv('SAEMP25N total.csv'), cols_to_keep, cols_num=cols_num)
+    df_industries = reshape(df_industries)
+    df_total = reshape(df_total, long_to_wide=False)
+    df_merged = merge_and_calculate(df_industries, df_total)
+    df_merged.to_csv('data.csv')
 
+def q_2():
+    df = pd.read_csv('data.csv').iloc[:, 1:]
+    top_states(df)
+    find_max(df, 2000)
+    find_max(df, 2017)
+
+PATH = r'E:\Files\HaHaHariss\21Fall\Data Skills for Public Policy\data_skills_2_hw1'
 cols_to_keep = ['GeoName', '2000', '2017', 'Description']
 cols_str = ['Description']
 cols_num = ['2000', '2017']
 
-df_industries = clean(read_bea_csv('SAEMP25N by industry.csv'), cols_to_keep, cols_str, cols_num)
-df_total = clean(read_bea_csv('SAEMP25N total.csv'), cols_to_keep, cols_num=cols_num)
+q_1()
+q_2()
 
-df_industries = reshape(df_industries)
-df_total = reshape(df_total, long_to_wide=False)
 
-df_merged = merge_and_calculate(df_industries, df_total)
-
-df_merged.to_csv('data.csv')
-
-df = pd.read_csv('data.csv').iloc[: , 1:]
-top_states(df)
-find_max(df,2000)
-find_max(df,2017)
 
 
