@@ -63,10 +63,23 @@ def top_states(df,industry='Manufacturing',top=5,year=2000):
     names_top_states = df[df['year'] == year].nlargest(top, industry)['state']
     print('top',top,'states that had the highest share of',
           industry,'employment in year',2000,'are:\n',
-          names_top_states.tolist())
+          names_top_states.tolist(),'\n')
     df_top_states = df[[c in names_top_states.tolist() for c in df['state']]][[*['state','year'], industry]]
     sns.lineplot(data=df_top_states, x='year', y=industry, hue='state')
-    plt.savefig('top 5 states of manufactoring shares.png')
+    plt.savefig('manufacturing_shares.png')
+    print('The change in share of manufacturing has been visualized and saved to manufacturing_shares.png','\n')
+
+
+def find_max(df,year,top=5):
+    df = df[df['year'] == year]
+    df_max = pd.DataFrame()
+    df_max['state'] = df['state']
+    df = df.drop(['year','state'],axis=1)
+    df_max['industry'] = df.idxmax(axis=1)
+    df_max['concentration'] = df.max(axis=1)
+    print('In year',year,', the following states had the highest concentration of employment in a single industry.\n',
+          'The information of state, industry, and employment concentration are as follows:')
+    print(df_max.nlargest(top, 'concentration'),'\n')
 
 
 PATH = r'E:\Files\HaHaHariss\21Fall\Data Skills for Public Policy\data_skills_2_hw1'
@@ -85,7 +98,9 @@ df_merged = merge_and_calculate(df_industries, df_total)
 
 df_merged.to_csv('data.csv')
 
-df = pd.read_csv('data.csv')
+df = pd.read_csv('data.csv').iloc[: , 1:]
 top_states(df)
+find_max(df,2000)
+find_max(df,2017)
 
 
